@@ -31,7 +31,7 @@ NSDictionary *initOptions;
   [self updateMapViewLayout];
 }
 - (void)updateMapViewLayout {
-  
+
   if (self.isFullScreen == NO) {
     [self.view setFrameWithDictionary:self.embedRect];
   }
@@ -44,23 +44,23 @@ NSDictionary *initOptions;
                                                             [NSNumber numberWithInt:128],
                                                             [NSNumber numberWithInt:128],
                                                             [NSNumber numberWithInt:128], nil] parsePluginColor];
-  
+
     //------------
     // Initialize
     //------------
     self.overlayManager = [NSMutableDictionary dictionary];
-  
+
     //------------------
     // Create a map view
     //------------------
-  
+
     //Intial camera position
     /*
     NSDictionary *cameraOpts = [initOptions objectForKey:@"camera"];
     NSMutableDictionary *latLng = [NSMutableDictionary dictionary];
     [latLng setObject:[NSNumber numberWithFloat:0.0f] forKey:@"lat"];
     [latLng setObject:[NSNumber numberWithFloat:0.0f] forKey:@"lng"];
-    
+
     if (cameraOpts) {
       NSDictionary *latLngJSON = [cameraOpts objectForKey:@"latLng"];
       [latLng setObject:[NSNumber numberWithFloat:[[latLngJSON valueForKey:@"lat"] floatValue]] forKey:@"lat"];
@@ -73,8 +73,8 @@ NSDictionary *initOptions;
                                   bearing:[[cameraOpts objectForKey:@"bearing"] doubleValue]
                                   viewingAngle:[[cameraOpts objectForKey:@"tilt"] doubleValue]];
     */
-    
-  
+
+
     NSDictionary *cameraOpts = [initOptions objectForKey:@"camera"];
     NSMutableDictionary *latLng = [NSMutableDictionary dictionary];
     [latLng setObject:[NSNumber numberWithFloat:0.0f] forKey:@"lat"];
@@ -83,7 +83,7 @@ NSDictionary *initOptions;
     float longitude;
     GMSCameraPosition *camera;
     GMSCoordinateBounds *cameraBounds = nil;
-  
+
     if ([cameraOpts objectForKey:@"target"]) {
       NSString *targetClsName = [[cameraOpts objectForKey:@"target"] className];
       if ([targetClsName isEqualToString:@"__NSCFArray"] || [targetClsName isEqualToString:@"__NSArrayM"] ) {
@@ -101,22 +101,22 @@ NSDictionary *initOptions;
           scale = [[UIScreen mainScreen] scale];
         }
         [[UIScreen mainScreen] scale];
-        
+
         cameraBounds = [[GMSCoordinateBounds alloc] initWithPath:path];
-        
+
         CLLocationCoordinate2D center = cameraBounds.center;
-        
+
         camera = [GMSCameraPosition cameraWithLatitude:center.latitude
                                             longitude:center.longitude
                                             zoom:0
                                             bearing:[[cameraOpts objectForKey:@"bearing"] doubleValue]
                                             viewingAngle:[[cameraOpts objectForKey:@"tilt"] doubleValue]];
-        
+
       } else {
         latLng = [cameraOpts objectForKey:@"target"];
         latitude = [[latLng valueForKey:@"lat"] floatValue];
         longitude = [[latLng valueForKey:@"lng"] floatValue];
-        
+
         camera = [GMSCameraPosition cameraWithLatitude:latitude
                                             longitude:longitude
                                             zoom:[[cameraOpts valueForKey:@"zoom"] floatValue]
@@ -131,7 +131,7 @@ NSDictionary *initOptions;
                               bearing:[[cameraOpts objectForKey:@"bearing"] doubleValue]
                               viewingAngle:[[cameraOpts objectForKey:@"tilt"] doubleValue]];
     }
-  
+
     CGRect pluginRect = self.view.frame;
     int marginBottom = 0;
     //if ([PluginUtil isIOS7] == false) {
@@ -144,11 +144,11 @@ NSDictionary *initOptions;
     self.map.delegate = self;
     //self.map.autoresizingMask = UIViewAutoresizingNone;
     self.map.autoresizingMask = UIViewAutoresizingFlexibleWidth | UIViewAutoresizingFlexibleHeight;
-  
+
     //indoor display
     self.map.indoorDisplay.delegate = self;
-  
-  
+
+
     BOOL isEnabled = NO;
     //controls
     NSDictionary *controls = [initOptions objectForKey:@"controls"];
@@ -173,7 +173,7 @@ NSDictionary *initOptions;
       self.map.settings.compassButton = TRUE;
     }
 
-  
+
     //gestures
     NSDictionary *gestures = [initOptions objectForKey:@"gestures"];
     if (gestures) {
@@ -198,11 +198,11 @@ NSDictionary *initOptions;
         self.map.settings.zoomGestures = isEnabled;
       }
     }
-  
+
     //mapType
     NSString *typeStr = [initOptions valueForKey:@"mapType"];
     if (typeStr) {
-      
+
       NSDictionary *mapTypes = [NSDictionary dictionaryWithObjectsAndKeys:
                                 ^() {return kGMSTypeHybrid; }, @"MAP_TYPE_HYBRID",
                                 ^() {return kGMSTypeSatellite; }, @"MAP_TYPE_SATELLITE",
@@ -210,7 +210,7 @@ NSDictionary *initOptions;
                                 ^() {return kGMSTypeNormal; }, @"MAP_TYPE_NORMAL",
                                 ^() {return kGMSTypeNone; }, @"MAP_TYPE_NONE",
                                 nil];
-      
+
       typedef GMSMapViewType (^CaseBlock)();
       GMSMapViewType mapType;
       CaseBlock caseBlock = mapTypes[typeStr];
@@ -220,9 +220,21 @@ NSDictionary *initOptions;
         self.map.mapType = mapType;
       }
     }
-  
+
+    // map styles
+    NSDictionary *JSONDic=[initOptions valueForKey:@"styles"];
+    NSError *error;
+    NSData *jsonData = [NSJSONSerialization dataWithJSONObject:JSONDic
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    if (jsonString) {
+        NSError *error;
+        self.map.mapStyle = [GMSMapStyle styleWithJSONString:jsonString error:&error];
+    }
+
     [self.view addSubview: self.map];
-  
+
     dispatch_async(dispatch_get_main_queue(), ^{
       if (cameraBounds != nil) {
         float scale = 1;
@@ -231,13 +243,13 @@ NSDictionary *initOptions;
         }
         [[UIScreen mainScreen] scale];
         [self.map moveCamera:[GMSCameraUpdate fitBounds:cameraBounds withPadding:10 * scale]];
-        
+
         GMSCameraPosition *cameraPosition2 = [GMSCameraPosition cameraWithLatitude:cameraBounds.center.latitude
                                             longitude:cameraBounds.center.longitude
                                             zoom:self.map.camera.zoom
                                             bearing:[[cameraOpts objectForKey:@"bearing"] doubleValue]
                                             viewingAngle:[[cameraOpts objectForKey:@"tilt"] doubleValue]];
-      
+
         [self.map setCamera:cameraPosition2];
 
       }
@@ -289,7 +301,7 @@ NSDictionary *initOptions;
 {
   dispatch_queue_t gueue = dispatch_queue_create("plugin.google.maps.Map._onMapEvent", NULL);
   dispatch_sync(gueue, ^{
-  
+
     NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onMapEvent('will_move', %@);", gesture ? @"true": @"false"];
 	  if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
 		  [self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
@@ -350,9 +362,9 @@ NSDictionary *initOptions;
 - (BOOL)mapView:(GMSMapView *)mapView didTapMarker:(GMSMarker *)marker {
   [self triggerMarkerEvent:@"click" marker:marker];
 
-  
+
   NSString *markerPropertyId = [NSString stringWithFormat:@"marker_property_%lu", (unsigned long)marker.hash];
-  
+
   NSDictionary *properties = [self.overlayManager objectForKey:markerPropertyId];
   BOOL disableAutoPan = false;
   if ([properties objectForKey:@"disableAutoPan"] != nil) {
@@ -404,8 +416,8 @@ NSDictionary *initOptions;
   [json setObject:[NSNumber numberWithDouble:position.viewingAngle] forKey:@"tilt"];
   [json setObject:[NSNumber numberWithInt:(int)position.hash] forKey:@"hashCode"];
   [json setObject:[NSNumber numberWithFloat:position.zoom] forKey:@"zoom"];
-  
-  
+
+
   NSData* jsonData = [NSJSONSerialization dataWithJSONObject:json options:0 error:nil];
   NSString* sourceArrayString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
   NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onCameraEvent('%@', %@);", eventName, sourceArrayString];
@@ -455,15 +467,15 @@ NSDictionary *initOptions;
   UIFont *titleFont;
   UIFont *snippetFont;
   UIImage *base64Image;
-  
+
   Boolean isTextMode = false;
   NSString *title = marker.title;
   NSString *snippet = marker.snippet;
-  
+
   if (title == nil) {
     return NULL;
   }
-  
+
   // Load styles
   NSString *markerPropertyId = [NSString stringWithFormat:@"marker_property_%lu", (unsigned long)marker.hash];
   NSDictionary *properties = [self.overlayManager objectForKey:markerPropertyId];
@@ -471,7 +483,7 @@ NSDictionary *initOptions;
   if ([properties objectForKey:@"styles"]) {
     styles = [properties objectForKey:@"styles"];
   }
-  
+
   // Load images
   UIImage *leftImg = nil;
   UIImage *rightImg = nil;[self loadImageFromGoogleMap:@"bubble_right@2x"];
@@ -484,14 +496,14 @@ NSDictionary *initOptions;
 
 	if (styles && [styles objectForKey:@"width"]) {
 		NSString *widthString = [styles valueForKey:@"width"];
-        
+
         // check if string is numeric
         NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
         BOOL isNumeric = [nf numberFromString:widthString] != nil;
 
 		if ([widthString hasSuffix:@"%"]) {
 			double widthDouble = [[widthString stringByReplacingOccurrencesOfString:@"%" withString:@""] doubleValue];
-			
+
 			width = (int)((double)mapView.frame.size.width * (widthDouble / 100));
 		} else if (isNumeric) {
 			double widthDouble = [widthString doubleValue];
@@ -508,20 +520,20 @@ NSDictionary *initOptions;
 
 	if (styles && [styles objectForKey:@"maxWidth"]) {
 		NSString *widthString = [styles valueForKey:@"maxWidth"];
-		
+
         NSNumberFormatter *nf = [[NSNumberFormatter alloc] init];
         BOOL isNumeric = [nf numberFromString:widthString] != nil;
-        
+
 		if ([widthString hasSuffix:@"%"]) {
 			double widthDouble = [[widthString stringByReplacingOccurrencesOfString:@"%" withString:@""] doubleValue];
-			
+
 			maxWidth = (int)((double)mapView.frame.size.width * (widthDouble / 100));
-			
+
 			// make sure to take padding into account.
 			maxWidth -= sizeEdgeWidth;
 		} else if (isNumeric) {
 			double widthDouble = [widthString doubleValue];
-			
+
 			if (widthDouble <= 1.0) {
 				maxWidth = (int)((double)mapView.frame.size.width * (widthDouble));
 			} else {
@@ -535,7 +547,7 @@ NSDictionary *initOptions;
   //-------------------------------------
   if ([title rangeOfString:@"data:image/"].location != NSNotFound &&
       [title rangeOfString:@";base64,"].location != NSNotFound) {
-    
+
     isTextMode = false;
     NSArray *tmp = [title componentsSeparatedByString:@","];
     NSData *decodedData;
@@ -548,14 +560,14 @@ NSDictionary *initOptions;
     #else
       decodedData = [NSData dataFromBase64String:tmp[1]];
     #endif
-    
+
     base64Image = [[UIImage alloc] initWithData:decodedData];
     rectSize = CGSizeMake(base64Image.size.width + leftImg.size.width, base64Image.size.height + leftImg.size.height / 2);
-    
+
   } else {
-  
+
     isTextMode = true;
-    
+
     BOOL isBold = FALSE;
     BOOL isItalic = FALSE;
     if (styles) {
@@ -583,11 +595,11 @@ NSDictionary *initOptions;
     } else {
       titleFont = [UIFont systemFontOfSize:17.0f];
     }
-    
+
     // Calculate the size for the title strings
     textSize = [title sizeWithFont:titleFont constrainedToSize: CGSizeMake(mapView.frame.size.width - 13, mapView.frame.size.height - 13)];
     rectSize = CGSizeMake(textSize.width + 10, textSize.height + 22);
-    
+
     // Calculate the size for the snippet strings
     if (snippet) {
       snippetFont = [UIFont systemFontOfSize:12.0f];
@@ -604,7 +616,7 @@ NSDictionary *initOptions;
   } else {
     rectSize.width += sizeEdgeWidth;
   }
-	
+
 	if (width > 0) {
 		rectSize.width = width;
 	}
@@ -612,14 +624,14 @@ NSDictionary *initOptions;
 		maxWidth < rectSize.width) {
 		rectSize.width = maxWidth;
 	}
-  
+
   //-------------------------------------
   // Draw the the info window
   //-------------------------------------
   UIGraphicsBeginImageContextWithOptions(rectSize, NO, 0.0f);
-  
+
   CGRect trimArea = CGRectMake(15, 0, 5, MIN(45, rectSize.height - 20));
-  
+
   trimArea = CGRectMake(15, 0, 15, leftImg.size.height);
   if (scale > 1.0f) {
     trimArea = CGRectMake(trimArea.origin.x * scale,
@@ -645,10 +657,10 @@ NSDictionary *initOptions;
     y = rectSize.height - shadowImageLeft.size.height;
     [shadowImageLeft drawAtPoint:CGPointMake(centerPos - x, y)];
     [shadowImageRight drawAtPoint:CGPointMake(centerPos + x - shadowImageLeft.size.width, y)];
-    
+
     if (i == 0) {
       x += 5;
-    
+
       trimArea = CGRectMake(15, 0, 5, leftImg.size.height);
       if (scale > 1.0f) {
         trimArea = CGRectMake(trimArea.origin.x * scale,
@@ -659,13 +671,13 @@ NSDictionary *initOptions;
       shadowImageRef = CGImageCreateWithImageInRect(leftImg.CGImage, trimArea);
       shadowImageLeft = [UIImage imageWithCGImage:shadowImageRef scale:scale orientation:UIImageOrientationUp];
       shadowImageRight = [UIImage imageWithCGImage:shadowImageRef scale:scale orientation:UIImageOrientationUpMirrored];
-    
+
     } else {
       x += shadowImageLeft.size.width;
     }
     i++;
   }
-  
+
   // Draw left & right side edges
   x -= shadowImageLeft.size.width;
   trimArea = CGRectMake(0, 0, sizeEdgeWidth, leftImg.size.height);
@@ -679,7 +691,7 @@ NSDictionary *initOptions;
   shadowImageLeft = [UIImage imageWithCGImage:shadowImageRef scale:scale orientation:UIImageOrientationUp];
   shadowImageRight = [UIImage imageWithCGImage:shadowImageRef scale:scale orientation:UIImageOrientationUpMirrored];
   x += shadowImageLeft.size.width;
-  
+
   y = 1;
   while (y + shadowImageLeft.size.height < rectSize.height) {
     [shadowImageLeft drawAtPoint:CGPointMake(centerPos - x, y)];
@@ -689,12 +701,12 @@ NSDictionary *initOptions;
   y = rectSize.height - shadowImageLeft.size.height;
   [shadowImageLeft drawAtPoint:CGPointMake(centerPos - x, y)];
   [shadowImageRight drawAtPoint:CGPointMake(centerPos + x - shadowImageLeft.size.width, y)];
-  
+
   // Fill the body area with WHITE color
   CGContextRef context = UIGraphicsGetCurrentContext();
   CGContextSetAllowsAntialiasing(context, true);
   CGContextSetRGBFillColor(context, 1.0, 1.0, 1.0, 1.0);
-  
+
   if (isTextMode) {
 
     if (snippet) {
@@ -705,27 +717,27 @@ NSDictionary *initOptions;
   } else {
     CGContextFillRect(context, CGRectMake(centerPos - x + 5, 4, rectSize.width - (centerPos - x + 5), rectSize.height - 16));
   }
-  
+
   //--------------------------------
   // text-align: left/center/right
   //--------------------------------
   NSTextAlignment textAlignment = NSTextAlignmentLeft;
   if (styles && [styles objectForKey:@"text-align"]) {
     NSString *textAlignValue = [styles objectForKey:@"text-align"];
-    
+
     NSDictionary *aligments = [NSDictionary dictionaryWithObjectsAndKeys:
                             ^() {return NSTextAlignmentLeft; }, @"left",
                             ^() {return NSTextAlignmentRight; }, @"right",
                             ^() {return NSTextAlignmentCenter; }, @"center",
                             nil];
-  
+
     typedef NSTextAlignment (^CaseBlock)();
     CaseBlock caseBlock = aligments[textAlignValue];
     if (caseBlock) {
       textAlignment = caseBlock();
     }
   }
-  
+
   //-------------------------------------
   // Draw the contents
   //-------------------------------------
@@ -736,14 +748,14 @@ NSDictionary *initOptions;
       if (styles && [styles objectForKey:@"color"]) {
         titleColor = [[styles valueForKey:@"color"] parsePluginColor];
       }
-      
+
       CGRect textRect = CGRectMake(5, 5 , rectSize.width - 10, textSize.height );
       if ([PluginUtil isIOS7_OR_OVER] == true) {
         // iOS7 and above
         NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
         style.lineBreakMode = NSLineBreakByWordWrapping;
         style.alignment = textAlignment;
-        
+
         NSDictionary *attributes = @{
             NSForegroundColorAttributeName : titleColor,
             NSFontAttributeName : titleFont,
@@ -751,8 +763,8 @@ NSDictionary *initOptions;
         };
         [title drawInRect:textRect
                withAttributes:attributes];
-        
-        
+
+
       } else {
         // iOS6
         [titleColor set];
@@ -764,7 +776,7 @@ NSDictionary *initOptions;
       //CGContextSetRGBStrokeColor(context, 1.0, 0.0, 0.0, 0.5);
       //CGContextStrokeRect(context, textRect);
     }
-    
+
     //Draw the snippet
     if (snippet) {
       CGRect textRect = CGRectMake(5, textSize.height + 10 , rectSize.width - 10, snippetSize.height );
@@ -773,7 +785,7 @@ NSDictionary *initOptions;
           NSMutableParagraphStyle *style = [[NSMutableParagraphStyle alloc] init];
           style.lineBreakMode = NSLineBreakByWordWrapping;
           style.alignment = textAlignment;
-          
+
           NSDictionary *attributes = @{
               NSForegroundColorAttributeName : [UIColor grayColor],
               NSFontAttributeName : snippetFont,
@@ -798,7 +810,7 @@ NSDictionary *initOptions;
     CGContextScaleCTM(context, 1.0, -1.0);
     CGContextDrawImage(context, imageRect, base64Image.CGImage);
   }
-  
+
 
   //-------------------------------------
   // Generate new image
@@ -829,34 +841,34 @@ NSDictionary *initOptions;
 }
 
 - (void) didChangeActiveLevel: (GMSIndoorLevel *)activeLevel {
-  
+
   GMSIndoorBuilding *building = self.map.indoorDisplay.activeBuilding;
-  
+
   NSMutableDictionary *result = [NSMutableDictionary dictionary];
-  
+
   NSUInteger activeLevelIndex = [building.levels indexOfObject:activeLevel];
   [result setObject:[NSNumber numberWithInteger:activeLevelIndex] forKey:@"activeLevelIndex"];
   [result setObject:[NSNumber numberWithInteger:building.defaultLevelIndex] forKey:@"defaultLevelIndex"];
-  
+
   GMSIndoorLevel *level;
   NSMutableDictionary *levelInfo;
   NSMutableArray *levels = [NSMutableArray array];
   for (level in building.levels) {
     levelInfo = [NSMutableDictionary dictionary];
-    
+
     [levelInfo setObject:[NSString stringWithString:level.name] forKey:@"name"];
     [levelInfo setObject:[NSString stringWithString:level.shortName] forKey:@"shortName"];
     [levels addObject:levelInfo];
   }
   [result setObject:levels forKey:@"levels"];
-  
+
   NSError *error;
   NSData *data = [NSJSONSerialization dataWithJSONObject:result options:NSJSONWritingPrettyPrinted error:&error];
-  
+
   NSString *JSONstring = [[NSString alloc] initWithData:data
                                            encoding:NSUTF8StringEncoding];
   NSString *jsString = [NSString stringWithFormat:@"javascript:plugin.google.maps.Map._onMapEvent('indoor_level_activated', %@)", JSONstring];
-  
+
 	if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
 		[self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
 	} else if ([self.webView respondsToSelector:@selector(evaluateJavaScript:completionHandler:)]) {
