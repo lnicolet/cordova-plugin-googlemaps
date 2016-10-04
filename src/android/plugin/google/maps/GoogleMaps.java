@@ -69,6 +69,7 @@ import com.google.android.gms.maps.MapView;
 import com.google.android.gms.maps.MapsInitializer;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.Projection;
+import com.google.android.gms.maps.model.MapStyleOptions;
 import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.CameraPosition.Builder;
 import com.google.android.gms.maps.model.Circle;
@@ -108,7 +109,7 @@ OnMyLocationButtonClickListener, OnIndoorStateChangeListener, InfoWindowAdapter,
     private float density;
     private HashMap<String, Bundle> bufferForLocationDialog = new HashMap<String, Bundle>();
     private FrameLayout mapFrame = null;
-
+    private MapStyleOptions stylesOption;
     @Override
     public void onScrollChanged() {
         if (mPluginLayout == null) {
