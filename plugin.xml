@@ -47,6 +47,10 @@
 
         <framework src="com.google.android.gms:play-services-maps:+" />
         <framework src="com.google.android.gms:play-services-location:+" />
+        
+        <!-- Framework here for Android? 
+         <framework src="https://github.com/googlemaps/android-maps-utils.git" />
+        -->
 
         <!-- plugin src files -->
         <source-file src="src/android/plugin/google/maps/AsyncLicenseInfo.java" target-dir="src/plugin/google/maps" />
@@ -228,6 +232,12 @@
           </array>
         </config-file>
 
-        <dependency id="com.googlemaps.ios" url="https://github.com/mapsplugin/cordova-plugin-googlemaps-sdk" branch="master"  />
+        <!-- <dependency id="com.googlemaps.ios" url="https://github.com/mapsplugin/cordova-plugin-googlemaps-sdk" branch="master"  /> -->
+        
+       <!-- Dependency here?
+        <dependency id="com.googlemaps.ios.utils" url="https://github.com/googlemaps/google-maps-ios-utils"
+            branch="master" />
+        -->
+       
     </platform>
 </plugin>

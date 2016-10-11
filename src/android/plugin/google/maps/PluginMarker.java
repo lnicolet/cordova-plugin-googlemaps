@@ -49,10 +49,16 @@ public class PluginMarker extends MyPlugin {
   private void createMarker(final JSONArray args, final CallbackContext callbackContext) throws JSONException {
     
     // Create an instance of Marker class
+      double lat;
+      double lng;
+      
+      
     final MarkerOptions markerOptions = new MarkerOptions();
     final JSONObject opts = args.getJSONObject(1);
     if (opts.has("position")) {
         JSONObject position = opts.getJSONObject("position");
+        lat = position.getDouble("lat");
+        lng = position.getDouble("lng");
         markerOptions.position(new LatLng(position.getDouble("lat"), position.getDouble("lng")));
     }
     if (opts.has("title")) {
@@ -83,8 +89,7 @@ public class PluginMarker extends MyPlugin {
     if (opts.has("zIndex")) {
       // do nothing, API v2 has no zIndex :(
     }
-    Marker marker = map.addMarker(markerOptions);
-
+      Marker marker = map.addMarker(markerOptions);
     
     // Store the marker
     String id = "marker_" + marker.getId();
