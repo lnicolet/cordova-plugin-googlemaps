@@ -47,13 +47,9 @@
 
         <framework src="com.google.android.gms:play-services-maps:+" />
         <framework src="com.google.android.gms:play-services-location:+" />
-        
-        <!-- Framework here for Android? 
-         <framework src="https://github.com/googlemaps/android-maps-utils.git" />
-        -->
 
         <!-- plugin src files -->
-        <source-file src="src/android/plugin/google/maps/AsyncLicenseInfo.java" target-dir="src/plugin/google/maps" />
+        
         <source-file src="src/android/plugin/google/maps/AsyncKmlParser.java" target-dir="src/plugin/google/maps" />
         <source-file src="src/android/plugin/google/maps/AsyncLoadImage.java" target-dir="src/plugin/google/maps" />
         <source-file src="src/android/plugin/google/maps/AsyncLoadImageInterface.java" target-dir="src/plugin/google/maps" />
@@ -74,6 +70,56 @@
         <source-file src="src/android/plugin/google/maps/PluginTileProvider.java" target-dir="src/plugin/google/maps" />
         <source-file src="src/android/plugin/google/maps/PluginUtil.java" target-dir="src/plugin/google/maps" />
         <source-file src="src/android/plugin/google/maps/PluginAsyncInterface.java" target-dir="src/plugin/google/maps" />
+        
+        <source-file src="src/android/plugin/google/maps/ClusterItemEGM.java" target-dir="src/plugin/google/maps" />
+        <source-file src="src/android/plugin/google/maps/CustomRendererEGM.java" target-dir="src/plugin/google/maps" />
+        <source-file src="src/android/plugin/google/maps/GoogleMapsClusterController.java" target-dir="src/plugin/google/maps" />
+        <source-file src="src/android/plugin/google/maps/GoogleMapsController.java" target-dir="src/plugin/google/maps" />
+        <source-file src="src/android/plugin/google/maps/GoogleMapsControllerImpl.java" target-dir="src/plugin/google/maps" />
+        <source-file src="src/android/plugin/google/maps/GoogleMapsDefaultController.java" target-dir="src/plugin/google/maps" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/MarkerManager.java" target-dir="src/plugin/google/maps/clustering" />
+        <source-file src="src/android/plugin/google/maps/clustering/MathUtil.java" target-dir="src/plugin/google/maps/clustering" />
+        <source-file src="src/android/plugin/google/maps/clustering/PolyUtil.java" target-dir="src/plugin/google/maps/clustering" />
+        <source-file src="src/android/plugin/google/maps/clustering/SphericalUtil.java" target-dir="src/plugin/google/maps/clustering" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/Cluster.java" target-dir="src/plugin/google/maps/clustering/clustering" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/ClusterItem.java" target-dir="src/plugin/google/maps/clustering/clustering" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/ClusterManager.java" target-dir="src/plugin/google/maps/clustering/clustering" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/algo/Algorithm.java" target-dir="src/plugin/google/maps/clustering/clustering/algo" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/algo/GridBasedAlgorithm.java" target-dir="src/plugin/google/maps/clustering/clustering/algo" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/algo/NonHierarchicalDistanceBasedAlgorithm.java" target-dir="src/plugin/google/maps/clustering/clustering/algo" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/algo/PreCachingAlgorithmDecorator.java" target-dir="src/plugin/google/maps/clustering/clustering/algo" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/algo/StaticCluster.java" target-dir="src/plugin/google/maps/clustering/clustering/algo" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/view/ClusterRenderer.java" target-dir="src/plugin/google/maps/clustering/clustering/view" />
+        <source-file src="src/android/plugin/google/maps/clustering/clustering/view/DefaultClusterRenderer.java" target-dir="src/plugin/google/maps/clustering/clustering/view" />
+        
+        
+        <source-file src="src/android/plugin/google/maps/clustering/geometry/Bounds.java" target-dir="src/plugin/google/maps/clustering/geometry" />
+        <source-file src="src/android/plugin/google/maps/clustering/geometry/Point.java" target-dir="src/plugin/google/maps/clustering/geometry" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/heatmaps/Gradient.java" target-dir="src/plugin/google/maps/clustering/heatmaps" />
+        <source-file src="src/android/plugin/google/maps/clustering/heatmaps/HeatmapTileProvider.java" target-dir="src/plugin/google/maps/clustering/heatmaps" />
+        <source-file src="src/android/plugin/google/maps/clustering/heatmaps/WeightedLatLng.java" target-dir="src/plugin/google/maps/clustering/heatmaps" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/projection/Point.java" target-dir="src/plugin/google/maps/clustering/projection" />
+        <source-file src="src/android/plugin/google/maps/clustering/projection/SphericalMercatorProjection.java" target-dir="src/plugin/google/maps/clustering/projection" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/quadtree/PointQuadTree.java" target-dir="src/plugin/google/maps/clustering/quadtree" />
+        
+        <source-file src="src/android/plugin/google/maps/clustering/ui/BubbleDrawable.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        <source-file src="src/android/plugin/google/maps/clustering/ui/BubbleIconFactory.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        <source-file src="src/android/plugin/google/maps/clustering/ui/IconGenerator.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        <source-file src="src/android/plugin/google/maps/clustering/ui/LfClusterIconDrawable.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        <source-file src="src/android/plugin/google/maps/clustering/ui/RotationLayout.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        <source-file src="src/android/plugin/google/maps/clustering/ui/SquareTextView.java" target-dir="src/plugin/google/maps/clustering/ui" />
+        
+        <source-file src="src/android/plugin/google/maps/layout/cluster_icon.xml" target-dir="res/layout" />
+        <source-file src="src/android/plugin/google/maps/icons/cluster_icon.png" target-dir="res/drawable-hdpi" />
+        <source-file src="src/android/plugin/google/maps/icons/cluster_icon_d.png" target-dir="res/drawable-hdpi" />
+
 
         <config-file target="AndroidManifest.xml" parent="/manifest/application">
             <meta-data
@@ -163,8 +209,39 @@
         <source-file src="src/ios/GoogleMaps/GoogleMaps.m" />
         <header-file src="src/ios/GoogleMaps/GoogleMapsViewController.h" />
         <source-file src="src/ios/GoogleMaps/GoogleMapsViewController.m" />
+        
+        <header-file src="src/ios/GoogleMaps/clusterer/GCluster.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GClusterAlgorithm.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GClusterItem.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GClusterManager.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GClusterManager.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GClusterRenderer.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GDefaultClusterRenderer.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GDefaultClusterRenderer.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQTBounds.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQTPoint.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQTPointQuadTree.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GQTPointQuadTree.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQTPointQuadTreeChild.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GQTPointQuadTreeChild.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQTPointQuadTreeItem.h" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GQuadItem.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GQuadItem.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GStaticCluster.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GStaticCluster.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GoogleMapsClusterViewController.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GoogleMapsClusterViewController.m" />
         <header-file src="src/ios/GoogleMaps/GroundOverlay.h" />
         <source-file src="src/ios/GoogleMaps/GroundOverlay.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/GAnimatedClusterRenderer.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/GAnimatedClusterRenderer.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/NonHierarchicalDistanceBasedAlgorithm.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/NonHierarchicalDistanceBasedAlgorithm.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/SphericalMercatorProjection.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/SphericalMercatorProjection.m" />
+        <header-file src="src/ios/GoogleMaps/clusterer/LF_Marker.h" />
+        <source-file src="src/ios/GoogleMaps/clusterer/LF_Marker.m" />
+
         <header-file src="src/ios/GoogleMaps/KmlOverlay.h" />
         <source-file src="src/ios/GoogleMaps/KmlOverlay.m" />
         <header-file src="src/ios/GoogleMaps/Map.h" />
@@ -233,11 +310,6 @@
         </config-file>
 
         <!-- <dependency id="com.googlemaps.ios" url="https://github.com/mapsplugin/cordova-plugin-googlemaps-sdk" branch="master"  /> -->
-        
-       <!-- Dependency here?
-        <dependency id="com.googlemaps.ios.utils" url="https://github.com/googlemaps/google-maps-ios-utils"
-            branch="master" />
-        -->
        
     </platform>
 </plugin>
