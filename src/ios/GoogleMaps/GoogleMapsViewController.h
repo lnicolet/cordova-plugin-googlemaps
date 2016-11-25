@@ -22,6 +22,7 @@
 @property (nonatomic) NSDictionary *embedRect;
 @property (nonatomic) CGRect screenSize;
 @property (nonatomic) BOOL debuggable;
+@property (nonatomic) int dataChanged;
 
 
 //- (UIView *)mapView:(GMSMapView *)mapView markerInfoWindow:(GMSMarker *)marker;
@@ -36,8 +37,8 @@
 - (UIImage *)getUIImageByKey: (NSString *)key;
 - (void)updateMapViewLayout;
 
-- (void)removeObjectForKey: (NSString *)key;
-- (BOOL)didTapMyLocationButtonForMapView:(GMSMapView *)mapView;
+- (void) removeObjectForKey: (NSString *)key;
+- (BOOL) didTapMyLocationButtonForMapView:(GMSMapView *)mapView;
 
 - (void) didChangeActiveBuilding: (GMSIndoorBuilding *)building;
 - (void) didChangeActiveLevel: (GMSIndoorLevel *)level;

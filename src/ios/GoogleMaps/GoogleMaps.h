@@ -9,11 +9,16 @@
 #import <Cordova/CDV.h>
 #import <GoogleMaps/GoogleMaps.h>
 #import "GoogleMapsViewController.h"
+#import "GoogleMapsClusterViewController.h"
 #import "Map.h"
 #import "PluginUtil.h"
 #import "MyPluginLayer.h"
 #import "MyReachability.h"
 #import "MyPluginScrollView.h"
+
+#import "GClusterAlgorithm.h"
+#import "GClusterRenderer.h"
+#import "GAnimatedClusterRenderer.h"
 
 @interface GoogleMaps : CDVPlugin<CLLocationManagerDelegate, UIScrollViewDelegate>
 

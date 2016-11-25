@@ -764,8 +764,8 @@
              */
 
 
-            dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
-            dispatch_async(queue, ^{
+            //dispatch_queue_t queue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_HIGH, 0ul);
+            dispatch_async(dispatch_get_main_queue(), ^{
 
                 NSURL *url = [NSURL URLWithString:iconPath];
 
