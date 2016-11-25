@@ -110,6 +110,17 @@ OnMyLocationButtonClickListener, OnIndoorStateChangeListener, InfoWindowAdapter,
     private HashMap<String, Bundle> bufferForLocationDialog = new HashMap<String, Bundle>();
     private FrameLayout mapFrame = null;
     private MapStyleOptions stylesOption;
+
+
+    // Clustering
+    public GoogleMapsController mapCtrl = null;
+
+    private static GoogleMaps instance;
+
+    public static GoogleMaps getInstance() {
+        return instance;
+    }
+
     @Override
     public void onScrollChanged() {
         if (mPluginLayout == null) {
@@ -144,7 +155,7 @@ OnMyLocationButtonClickListener, OnIndoorStateChangeListener, InfoWindowAdapter,
     private final int ACTIVITY_LOCATION_PAGE = 0x7f999901;   // Open the location settings page
 
     private JSONObject mapDivLayoutJSON = null;
-    private MapView mapView = null;
+    // private MapView mapView = null;
     public GoogleMap map = null;
     private Activity activity;
     private LinearLayout windowLayer = null;
@@ -162,6 +173,7 @@ OnMyLocationButtonClickListener, OnIndoorStateChangeListener, InfoWindowAdapter,
     public void initialize(final CordovaInterface cordova, final CordovaWebView webView) {
         super.initialize(cordova, webView);
         activity = cordova.getActivity();
+        instance = this;
         density = Resources.getSystem().getDisplayMetrics().density;
         final View view = webView.getView();
         root = (ViewGroup) view.getParent();
@@ -293,7 +305,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
             return;
         }
         if (args.length() == 2) {
-            mPluginLayout.attachMyView(mapView);
+            mPluginLayout.attachMyView(mapCtrl.getMapView());
             this.resizeMap(args, callbackContext);
         }
     }
@@ -309,12 +321,32 @@ public boolean execute(final String action, final JSONArray args, final Callback
         boolean visible = args.getBoolean(0);
         if (this.windowLayer == null) {
             if (visible) {
-                mapView.setVisibility(View.VISIBLE);
+                mapCtrl.getMapView().setVisibility(View.VISIBLE);
             } else {
-                mapView.setVisibility(View.INVISIBLE);
+                mapCtrl.getMapView().setVisibility(View.INVISIBLE);
             }
         }
         this.sendNoResult(callbackContext);
+    }
+
+    @SuppressWarnings("unused")
+    private void syncMarkers(JSONArray args, final CallbackContext callbackContext) {
+
+        final JSONArray result;
+        try {
+            result = this.mapCtrl.getClusterManager().getMarkerCollection().getMarkersJSON();
+            if (result.length() == 0) {
+                callbackContext.error("There are no markers to synchronize");
+            }
+            else {
+                Log.d(TAG, "RESULT: " + result);
+                callbackContext.success(result);
+            }
+        } catch (JSONException e) {
+            e.printStackTrace();
+            callbackContext.error("Could not load Markers");
+        }
+
     }
 
     @TargetApi(Build.VERSION_CODES.HONEYCOMB)
@@ -555,7 +587,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                     options.camera(builder.build());
                 }
 
-                mapView = new MapView(activity, options);
+                final MapView mapView = new MapView(activity, options);
                 mapView.onCreate(null);
                 mapView.onResume();
                 mapView.getMapAsync(new OnMapReadyCallback() {
@@ -563,11 +595,13 @@ public boolean execute(final String action, final JSONArray args, final Callback
                     public void onMapReady(GoogleMap googleMap) {
 
                         map = googleMap;
+                        Boolean useDefaultController = false;
 
                         try {
+                            JSONObject controls = null;
                             //controls
                             if (params.has("controls")) {
-                                JSONObject controls = params.getJSONObject("controls");
+                                controls = params.getJSONObject("controls");
 
                                 if (controls.has("indoorPicker")) {
                                     Boolean isEnabled = controls.getBoolean("indoorPicker");
@@ -575,16 +609,59 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                 }
                             }
 
-                            // Set event listener
-                            map.setOnCameraChangeListener(GoogleMaps.this);
-                            map.setOnInfoWindowClickListener(GoogleMaps.this);
-                            map.setOnMapClickListener(GoogleMaps.this);
-                            map.setOnMapLoadedCallback(GoogleMaps.this);
-                            map.setOnMapLongClickListener(GoogleMaps.this);
-                            map.setOnMarkerClickListener(GoogleMaps.this);
-                            map.setOnMarkerDragListener(GoogleMaps.this);
-                            map.setOnMyLocationButtonClickListener(GoogleMaps.this);
-                            map.setOnIndoorStateChangeListener(GoogleMaps.this);
+                            if (params.has("controller")) {
+                                JSONObject controller = params.getJSONObject("controller");
+
+                                if (controller.has("clustering")) {
+                                    Boolean isClusteringEnabled = controller.getBoolean("clustering");
+
+                                    if (isClusteringEnabled) {
+
+                                        mapCtrl = new GoogleMapsClusterController(googleMap, mapView, controls, mPluginLayout.getContext());
+                                        mapCtrl.setActivity(activity);
+                                        mapCtrl.getMap().setOnInfoWindowClickListener(GoogleMaps.this);
+                                        mapCtrl.getMap().setInfoWindowAdapter(GoogleMaps.this);
+                                        mapCtrl.getMap().setOnMapLongClickListener(GoogleMaps.this);
+
+                                    } else {
+
+                                        useDefaultController = true;
+
+                                    }
+
+
+                                } else {
+
+                                    useDefaultController = true;
+
+                                    //Log.w(TAG, "Can not create MapController because there are no controller-information's.");
+                                    //callbackContext.error("Can not create mapController. Add controller and clustering option to MapOptions.");
+                                }
+
+                            } else {
+
+                                useDefaultController = true;
+                            }
+
+                            if (useDefaultController) {
+
+                                mapCtrl = new GoogleMapsDefaultController(googleMap, mapView, controls);
+                                mapCtrl.setActivity(activity);
+
+                                mapCtrl.getMap().setOnInfoWindowClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setInfoWindowAdapter(GoogleMaps.this);
+
+                                mapCtrl.getMap().setOnCameraChangeListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnInfoWindowClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMapClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMapLoadedCallback(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMapLongClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMarkerClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMarkerDragListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnMyLocationButtonClickListener(GoogleMaps.this);
+                                mapCtrl.getMap().setOnIndoorStateChangeListener(GoogleMaps.this);
+                            }
+
 
                             // Load PluginMap class
                             GoogleMaps.this.loadPlugin("Map");
@@ -595,7 +672,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                             // ------------------------------
                             if (args.length() == 3) {
                                 GoogleMaps.this.mapDivLayoutJSON = args.getJSONObject(1);
-                                mPluginLayout.attachMyView(mapView);
+                                mPluginLayout.attachMyView(mapCtrl.getMapView());
                                 GoogleMaps.this.resizeMap(args, callbackContext);
                             } else {
                                 if (initCameraBounds != null) {
@@ -617,7 +694,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
 
 
                             if (params.has("controls")) {
-                                JSONObject controls = params.getJSONObject("controls");
+                                controls = params.getJSONObject("controls");
 
                                 if (controls.has("myLocationButton")) {
                                     Boolean isEnabled = controls.getBoolean("myLocationButton");
@@ -656,25 +733,32 @@ public boolean execute(final String action, final JSONArray args, final Callback
             //-----------------------------------
             @SuppressWarnings("rawtypes")
             private void loadPlugin(String serviceName) {
-                if (plugins.containsKey(serviceName)) {
-                    return;
-                }
+
                 try {
-                    String className = "plugin.google.maps.Plugin" + serviceName;
-                    Class pluginCls = Class.forName(className);
+                    Class pluginCls = Class.forName("plugin.google.maps.Plugin" + serviceName);
 
                     CordovaPlugin plugin = (CordovaPlugin) pluginCls.newInstance();
                     PluginEntry pluginEntry = new PluginEntry("GoogleMaps", plugin);
                     this.plugins.put(serviceName, pluginEntry);
 
-                    plugin.privateInitialize(className, this.cordova, webView, null);
+                    try {
+                        Class cordovaPref = Class.forName("org.apache.cordova.CordovaPreferences");
+                        if (cordovaPref != null) {
+                            Method privateInit = CordovaPlugin.class.getMethod("privateInitialize", CordovaInterface.class, CordovaWebView.class, cordovaPref);
+                            if (privateInit != null) {
+                                privateInit.invoke(plugin, this.cordova, webView, null);
+                            }
+                        }
+                    } catch (Exception e2) {}
 
                     plugin.initialize(this.cordova, webView);
                     ((MyPluginInterface)plugin).setMapCtrl(this);
-                    if (map == null) {
+                    if (mapCtrl.getMap() == null) {
                         Log.e(TAG, "map is null!");
                     }
-
+                    if (mapCtrl == null) {
+                        Log.e(TAG, "mapCtrl is null!");
+                    }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
@@ -688,12 +772,12 @@ public boolean execute(final String action, final JSONArray args, final Callback
             }
 
             private void closeWindow() {
-                if (mapView != null) {
-                    mapFrame.removeView(mapView);
+                if (mapCtrl.getMapView() != null) {
+                    mapFrame.removeView(mapCtrl.getMapView());
                 }
                 if (mPluginLayout != null &&
                 mapDivLayoutJSON != null) {
-                    mPluginLayout.attachMyView(mapView);
+                    mPluginLayout.attachMyView(mapCtrl.getMapView());
                     mPluginLayout.updateViewPosition();
                 }
                 root.removeView(windowLayer);
@@ -736,7 +820,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                     this.mPluginLayout.detachMyView();
                 }
 
-                ViewGroup.LayoutParams lParams = (ViewGroup.LayoutParams) mapView.getLayoutParams();
+                ViewGroup.LayoutParams lParams = (ViewGroup.LayoutParams) mapCtrl.getMapView().getLayoutParams();
                 if (lParams == null) {
                     lParams = new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
                 }
@@ -746,19 +830,19 @@ public boolean execute(final String action, final JSONArray args, final Callback
                     AbsoluteLayout.LayoutParams params = (AbsoluteLayout.LayoutParams) lParams;
                     params.x = 0;
                     params.y = 0;
-                    mapView.setLayoutParams(params);
+                    mapCtrl.getMapView().setLayoutParams(params);
                 } else if (lParams instanceof LinearLayout.LayoutParams) {
                     LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) lParams;
                     params.topMargin = 0;
                     params.leftMargin = 0;
-                    mapView.setLayoutParams(params);
+                    mapCtrl.getMapView().setLayoutParams(params);
                 } else if (lParams instanceof FrameLayout.LayoutParams) {
                     FrameLayout.LayoutParams params = (FrameLayout.LayoutParams) lParams;
                     params.topMargin = 0;
                     params.leftMargin = 0;
-                    mapView.setLayoutParams(params);
+                    mapCtrl.getMapView().setLayoutParams(params);
                 }
-                mapFrame.addView(this.mapView);
+                mapFrame.addView(mapCtrl.getMapView());
 
                 // button frame
                 LinearLayout buttonFrame = new LinearLayout(activity);
@@ -781,7 +865,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                 closeLink.setGravity(Gravity.LEFT);
                 closeLink.setPadding((int)(10 * density), 0, 0, (int)(10 * density));
                 closeLink.setOnClickListener(GoogleMaps.this);
-                closeLink.setId(CLOSE_LINK_ID);
+                closeLink.setId(View.generateViewId());
                 buttonFrame.addView(closeLink);
 
                 //license button
@@ -793,7 +877,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                 licenseLink.setGravity(Gravity.RIGHT);
                 licenseLink.setPadding((int)(10 * density), (int)(20 * density), (int)(10 * density), (int)(10 * density));
                 licenseLink.setOnClickListener(GoogleMaps.this);
-                licenseLink.setId(LICENSE_LINK_ID);
+                licenseLink.setId(View.generateViewId());
                 buttonFrame.addView(licenseLink);
 
                 //webView.getView().setVisibility(View.INVISIBLE);
@@ -894,7 +978,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                     divLeft + divW,
                     divTop + divH - webView.getView().getScrollY());
                     mPluginLayout.updateViewPosition();
-                    mapView.requestLayout();
+                    mapCtrl.getMapView().requestLayout();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -1772,24 +1856,24 @@ public boolean execute(final String action, final JSONArray args, final Callback
 
                                     @Override
                                     public void onPause(boolean multitasking) {
-                                        if (mapView != null) {
-                                            mapView.onPause();
+                                        if ( mapCtrl != null && mapCtrl.getMapView() != null) {
+                                            mapCtrl.getMapView().onPause();
                                         }
                                         super.onPause(multitasking);
                                     }
 
                                     @Override
                                     public void onResume(boolean multitasking) {
-                                        if (mapView != null) {
-                                            mapView.onResume();
+                                        if ( mapCtrl != null && mapCtrl.getMapView() != null) {
+                                            mapCtrl.getMapView().onResume();
                                         }
                                         super.onResume(multitasking);
                                     }
 
                                     @Override
                                     public void onDestroy() {
-                                        if (mapView != null) {
-                                            mapView.onDestroy();
+                                        if ( mapCtrl != null && mapCtrl.getMapView() != null) {
+                                            mapCtrl.getMapView().onDestroy();
                                         }
                                         super.onDestroy();
                                     }
@@ -1860,12 +1944,12 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                     if (widthString.endsWith("%")) {
                                                         double widthDouble = Double.parseDouble(widthString.replace ("%", ""));
 
-                                                        width = (int)((double)mapView.getWidth() * (widthDouble / 100));
+                                                        width = (int)((double)mapCtrl.getMapView().getWidth() * (widthDouble / 100));
                                                     } else if (isNumeric(widthString)) {
                                                         double widthDouble = Double.parseDouble(widthString);
 
                                                         if (widthDouble <= 1.0) {	// for percentage values (e.g. 0.5 = 50%).
-                                                            width = (int)((double)mapView.getWidth() * (widthDouble));
+                                                            width = (int)((double)mapCtrl.getMapView().getWidth() * (widthDouble));
                                                         } else {
                                                             width = (int)widthDouble;
                                                         }
@@ -1882,7 +1966,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                         if (widthString.endsWith("%")) {
                                                             double widthDouble = Double.parseDouble(widthString.replace ("%", ""));
 
-                                                            maxWidth = (int)((double)mapView.getWidth() * (widthDouble / 100));
+                                                            maxWidth = (int)((double)mapCtrl.getMapView().getWidth() * (widthDouble / 100));
 
                                                             // make sure to take padding into account.
                                                             maxWidth -= (windowLayer.getPaddingLeft() + windowLayer.getPaddingRight());
@@ -1890,7 +1974,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                             double widthDouble = Double.parseDouble(widthString);
 
                                                             if (widthDouble <= 1.0) {	// for percentage values (e.g. 0.5 = 50%).
-                                                                maxWidth = (int)((double)mapView.getWidth() * (widthDouble));
+                                                                maxWidth = (int)((double)mapCtrl.getMapView().getWidth() * (widthDouble));
                                                             } else {
                                                                 maxWidth = (int)widthDouble;
                                                             }
@@ -2068,7 +2152,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                                 @SuppressWarnings("unused")
                                                                 private void pluginLayer_setClickable(JSONArray args, CallbackContext callbackContext) throws JSONException {
                                                                     boolean clickable = args.getBoolean(0);
-                                                                    if (mapView != null && this.windowLayer == null) {
+                                                                    if (mapCtrl != null && mapCtrl.getMapView() != null && this.windowLayer == null) {
                                                                         this.mPluginLayout.setClickable(clickable);
                                                                     }
                                                                     this.sendNoResult(callbackContext);
@@ -2104,7 +2188,7 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                                     @SuppressWarnings("unused")
                                                                     private void pluginLayer_setDebuggable(JSONArray args, CallbackContext callbackContext) throws JSONException {
                                                                         boolean debuggable = args.getBoolean(0);
-                                                                        if (mapView != null && this.windowLayer == null) {
+                                                                        if (mapCtrl != null && mapCtrl.getMapView() != null && this.windowLayer == null) {
                                                                             this.mPluginLayout.setDebug(debuggable);
                                                                         }
                                                                         this.isDebug = debuggable;
@@ -2128,11 +2212,11 @@ public boolean execute(final String action, final JSONArray args, final Callback
                                                                             map.setMyLocationEnabled(false);
                                                                             map.clear();
                                                                         }
-                                                                        if (mapView != null) {
-                                                                            mapView.onDestroy();
+                                                                        if (mapCtrl != null && mapCtrl.getMapView() != null) {
+                                                                            mapCtrl.getMapView().onDestroy();
                                                                         }
                                                                         map = null;
-                                                                        mapView = null;
+                                                                        mapCtrl = null;
                                                                         windowLayer = null;
                                                                         mapDivLayoutJSON = null;
                                                                         System.gc();
