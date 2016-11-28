@@ -7,7 +7,7 @@ Both [PhoneGap](http://phonegap.com/) and [Apache Cordova](http://cordova.apache
 
 ###Some info
 
-I forked this repo form the v1.4.0 & added styles support in both Android & iOS platforms. Right now, clustering is supported in Android only. Here's a code example on how to use it:
+I forked this repo form the v1.4.0 & added styles support in both Android & iOS platforms. Clustering works with both platforms now, but still has some bugs on iOs devices while it's working fine with Android. Here's a code example on how to use it:
 
 ```javascript
 this.mapParams = {

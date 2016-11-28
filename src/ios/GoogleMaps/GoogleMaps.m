@@ -195,23 +195,19 @@
                     algorithm = [[NonHierarchicalDistanceBasedAlgorithm alloc]init];
                 }
                 else {
-                    algoSet = false;
-                    NSLog(@"Unknown algorithm \"%@\": use nonclustering controller instead", [controller objectForKey:@"algorithm"]);
-                    self.mapCtrl = [[GoogleMapsViewController alloc] initWithOptions:options];
+                    // SET a DEFAULT algorithm to use if no one is declared
+                    algorithm = [[NonHierarchicalDistanceBasedAlgorithm alloc]init];
                 }
             }
             
             if ([controller objectForKey:@"rendering"]) {
                 rendSet = true;
-                if ([[controller objectForKey:@"rendering"]  isEqual: @"default"]) {
-                    renderer = [[GDefaultClusterRenderer alloc]init];
-                }
-                else if ([[controller objectForKey:@"rendering"]  isEqual: @"animated"]) {
+                if ([[controller objectForKey:@"rendering"]  isEqual: @"animated"]) {
                     renderer = [[GAnimatedClusterRenderer alloc]init];
                 }
                 else {
-                    rendSet = false;
-                    NSLog(@"Unknown renderer \"%@\": use nonclustering controller instead", [controller objectForKey:@"rendering"]);
+                    // set the default cluster rendered if no one is declared
+                    renderer = [[GDefaultClusterRenderer alloc]init];
                 }
             }
             
@@ -219,14 +215,15 @@
                 self.mapCtrl = [[GoogleMapsClusterViewController alloc] initWithAlgorithm:algorithm andRenderer:renderer andOptions:options];
             }
             else {
-                NSLog(@"Default ViewController. 2");
+                NSLog(@"Default ViewController. 2 - NO CLUSTERING ACTIVATED - something went wrong.");
                 self.mapCtrl = [[GoogleMapsViewController alloc] initWithOptions:options];
             }
         }
         else {
-            NSLog(@"Default ViewController. 1");
+            NSLog(@"Default ViewController. 1 - NO CLUSTERING ACTIVATED - something went wrong.");
             self.mapCtrl = [[GoogleMapsViewController alloc] initWithOptions:options];
         }
+        // C.A. clustering end -------------------------------------------------------------
 
         self.mapCtrl.webView = self.webView;
 
