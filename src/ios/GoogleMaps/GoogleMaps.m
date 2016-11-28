@@ -239,9 +239,8 @@
         // Create an instance of Map Class
 #if CORDOVA_VERSION_MIN_REQUIRED >= __CORDOVA_4_0_0
         Map *mapClass = [(CDVViewController*)self.viewController getCommandInstance:@"Map"];
-        mapClass.mapCtrl = self.mapCtrl;
 #else
-        Map *mapClass = [[NSClassFromString(@"Map")alloc] initWithWebView:self.mapCtrl.webView];
+        Map *mapClass = [[NSClassFromString(@"Map")alloc] initWithWebView:self.webView];
 #endif
         mapClass.commandDelegate = self.commandDelegate;
         [mapClass setGoogleMapsViewController:self.mapCtrl];
@@ -313,12 +312,13 @@
             if (!pluginClass) {
 #if CORDOVA_VERSION_MIN_REQUIRED >= __CORDOVA_4_0_0
                 pluginClass = [(CDVViewController*)self.viewController getCommandInstance:className];
+
 #else
-                pluginClass = [[NSClassFromString(className)alloc] initWithWebView:self.mapCtrl.webView];
+                pluginClass = [[NSClassFromString(className)alloc] initWithWebView:self.webView];
 #endif
                 if (pluginClass) {
                     pluginClass.commandDelegate = self.commandDelegate;
-                    [pluginClass setGoogleMapsViewController:self.mapCtrl];
+                    [pluginClass setGoogleMapsViewController : self.mapCtrl];
                     [self.mapCtrl.plugins setObject:pluginClass forKey:className];
                 }
             }

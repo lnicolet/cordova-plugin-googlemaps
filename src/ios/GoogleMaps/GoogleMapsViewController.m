@@ -232,6 +232,7 @@ NSDictionary *initOptions;
         NSError *error;
         self.map.mapStyle = [GMSMapStyle styleWithJSONString:jsonString error:&error];
     }
+    
 
     [self.view addSubview: self.map];
 

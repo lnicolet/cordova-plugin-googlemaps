@@ -22,7 +22,7 @@
 }
 
 - (id)init {
-    return [self initWithMaxDistanceAtZoom:150];
+    return [self initWithMaxDistanceAtZoom:60];
 }
 
 - (void)addItem:(id <GClusterItem>) item {

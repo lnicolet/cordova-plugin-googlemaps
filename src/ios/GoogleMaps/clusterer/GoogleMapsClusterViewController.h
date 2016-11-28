@@ -17,7 +17,9 @@
 #import "GClusterAlgorithm.h"
 #import "GClusterRenderer.h"
 #import "GQTPointQuadTreeItem.h"
-//#import "GAnimatedClusterRenderer.h"
+#import "GAnimatedClusterRenderer.h"
+// Development
+#import "NonHierarchicalDistanceBasedAlgorithm.h"
 
 @interface GoogleMapsClusterViewController : GoogleMapsViewController
 

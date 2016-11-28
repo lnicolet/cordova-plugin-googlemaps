@@ -49,7 +49,7 @@
 
     clusterIcons = [[NSMutableDictionary alloc] init];
 
-    minimumClusterCount = 4;
+    minimumClusterCount = 2;
 
     previewsDiscreteZoom = 0;
 

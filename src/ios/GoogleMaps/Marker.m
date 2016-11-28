@@ -132,6 +132,8 @@
             [self.commandDelegate sendPluginResult:pluginResult callbackId:command.callbackId];
         }
     }
+    
+    self.mapCtrl.dataChanged++;
 }
 
 /**

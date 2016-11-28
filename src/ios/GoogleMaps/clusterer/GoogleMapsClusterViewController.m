@@ -24,7 +24,7 @@ NSDictionary *initOptions;
 - (id)initWithAlgorithm:(id<GClusterAlgorithm>) algorithm andRenderer:(id<GClusterRenderer>) renderer andOptions:(NSDictionary *)options {
     self = [super initWithOptions:options];
     // The distance that the clusteralgorithm uses as the radius of one cluster.
-    maxDistanceAtZoom = 70;
+    maxDistanceAtZoom = 50;
 
     self.clusterAlgorithm = algorithm;
     self.clusterRenderer = renderer;
@@ -68,6 +68,7 @@ NSDictionary *initOptions;
 
 - (void)importClusterData {
     //  NSLog(@"\nNew Markers - %i", self.dataChanged);
+    
     if (self.dataChanged > 0) {
 
         GMSMarker * marker = nil;
@@ -165,7 +166,6 @@ NSDictionary *initOptions;
 
     if (previousCameraPosition.zoom == self.map.camera.zoom) {
         if (self.dataChanged > 0) {
-
             [self updateCluster];
         }
         else {
@@ -256,7 +256,11 @@ NSDictionary *initOptions;
 {
     NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onMapEvent('%@', new window.plugin.google.maps.LatLng(%f,%f));",
                           eventName, coordinate.latitude, coordinate.longitude];
-    [self.webView stringByEvaluatingJavaScriptFromString:jsString];
+    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
+        [self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
+    } else if ([self.webView respondsToSelector:@selector(evaluateJavaScript:completionHandler:)]) {
+        [self.webView performSelector:@selector(evaluateJavaScript:completionHandler:) withObject:jsString withObject:nil];
+    }
 }
 /**
  * Involve App._onCameraEvent
@@ -276,8 +280,27 @@ NSDictionary *initOptions;
     [json setObject:[NSNumber numberWithInt:(int)position.hash] forKey:@"hashCode"];
     [json setObject:[NSNumber numberWithFloat:position.zoom] forKey:@"zoom"];
 
-    NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onCameraEvent('%@', %@);", eventName, [json JSONString]];
-    [self.webView stringByEvaluatingJavaScriptFromString:jsString];
+    NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onCameraEvent('%@', %@);", eventName, [self cdv_JSONString:json]];
+    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
+        [self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
+    } else if ([self.webView respondsToSelector:@selector(evaluateJavaScript:completionHandler:)]) {
+        [self.webView performSelector:@selector(evaluateJavaScript:completionHandler:) withObject:jsString withObject:nil];
+    }
+}
+
+- (NSString*)cdv_JSONString: (NSMutableDictionary*) data
+{
+    NSError* error = nil;
+    NSData* jsonData = [NSJSONSerialization dataWithJSONObject:data
+                                                       options:NSJSONWritingPrettyPrinted
+                                                         error:&error];
+    
+    if (error != nil) {
+        NSLog(@"NSMutableDictionary JSONString error: %@", [error localizedDescription]);
+        return nil;
+    } else {
+        return [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+    }
 }
 
 
@@ -288,7 +311,11 @@ NSDictionary *initOptions;
 {
     NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onMarkerEvent('%@', 'marker_%lu');",
                           eventName, (unsigned long)marker.hash];
-    [self.webView stringByEvaluatingJavaScriptFromString:jsString];
+    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
+        [self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
+    } else if ([self.webView respondsToSelector:@selector(evaluateJavaScript:completionHandler:)]) {
+        [self.webView performSelector:@selector(evaluateJavaScript:completionHandler:) withObject:jsString withObject:nil];
+    }
 }
 
 /**
@@ -298,7 +325,11 @@ NSDictionary *initOptions;
 {
     NSString* jsString = [NSString stringWithFormat:@"plugin.google.maps.Map._onOverlayEvent('%@', '%@');",
                           eventName, id];
-    [self.webView stringByEvaluatingJavaScriptFromString:jsString];
+    if ([self.webView respondsToSelector:@selector(stringByEvaluatingJavaScriptFromString:)]) {
+        [self.webView performSelector:@selector(stringByEvaluatingJavaScriptFromString:) withObject:jsString];
+    } else if ([self.webView respondsToSelector:@selector(evaluateJavaScript:completionHandler:)]) {
+        [self.webView performSelector:@selector(evaluateJavaScript:completionHandler:) withObject:jsString withObject:nil];
+    }
 }
 
 //future support: custom info window

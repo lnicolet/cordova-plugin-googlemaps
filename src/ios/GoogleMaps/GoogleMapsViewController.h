@@ -22,7 +22,9 @@
 @property (nonatomic) NSDictionary *embedRect;
 @property (nonatomic) CGRect screenSize;
 @property (nonatomic) BOOL debuggable;
-@property (nonatomic) int dataChanged;
+
+/* Will be changed by Marker. If there are any new created markers */
+@property (nonatomic) unsigned int dataChanged;
 
 
 //- (UIView *)mapView:(GMSMapView *)mapView markerInfoWindow:(GMSMarker *)marker;
